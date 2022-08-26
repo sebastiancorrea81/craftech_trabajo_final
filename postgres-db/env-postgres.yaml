@@ -1,0 +1,29 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+data:
+  database: cG9zdGdyZXM=
+  postgres-password: YWRtaW4=
+  postgres-username: YWRtaW4=
+  postgres-db: cG9zdGdyZXMtZGI=
+kind: Secret
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"DATABASE":"cG9zdGdyZXM=","POSTGRES_DB":"cG9zdGdyZXMtZGI=","POSTGRES_PASSWORD":"MTIzNDU2Nzg=","POSTGRES_USER":"YWRtaW4="},"kind":"Secret","metadata":{"annotations":{},"name":"env-postgres","namespace":"develop"},"type":"Opaque"}
+  creationTimestamp: "2022-08-26T03:52:32Z"
+  name: env-postgres
+  namespace: develop
+  resourceVersion: "8971"
+  uid: f2829d6e-869a-46ea-aec9-365eeba36290
+type: Opaque
+
+
+
+#data:
+#DATABASE=postgres
+#POSTGRES_USER=admin
+#POSTGRES_PASSWORD=admin
+#POSTGRES_DB=postgres-db
