@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend-app.fullname" . }}
+  labels:
+    {{- include "backend-app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "backend-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "backend-app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "backend-app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: "SECRET_KEY"
+              valueFrom:
+                secretKeyRef:
+                  key:  SECRET_KEY
+                  name: env-backend
+            - name: "ALLOWED_HOSTS"
+              valueFrom:
+                secretKeyRef:
+                  key:  ALLOWED_HOSTS
+                  name: env-backend
+            - name: "SQL_ENGINE"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_ENGINE
+                  name: env-backend
+            - name: "SQL_DATABASE"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_DATABASE
+                  name: env-backend
+            - name: "SQL_USER"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_USER
+                  name: env-backend
+            - name: "SQL_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_PASSWORD
+                  name: env-backend
+            - name: "SQL_HOST"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_HOST
+                  name: env-backend
+            - name: "SQL_PORT"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_PORT
+                  name: env-backend
+            - name: "RUNSERVER_PORT"
+              valueFrom:
+                secretKeyRef:
+                  key:  RUNSERVER_PORT
+                  name: env-backend
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

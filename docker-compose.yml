@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  testapp-database:
+    image: postgres:12
+    container_name: testapp-database
+    env_file:
+      - ./test-app-backend/.env-postgres
+    #ports:
+    #  - "5432:5432"
+    networks:
+      - testapp-network
+  
+  testapp-backend:
+    build:
+      context: ./test-app-backend/
+      dockerfile: Dockerfile
+    image: testapp-backend
+    env_file:
+      - ./test-app-backend/.env-django
+    #entrypoint: ./entrypoint.sh
+    container_name: testapp-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - testapp-database
+    networks:
+      - testapp-network
+      
+  testapp-frontend:
+    build:
+      context: ./test-app-frontend/
+      dockerfile: Dockerfile
+    image: testapp-frontend
+    container_name: testapp-frontend
+    depends_on:
+      - testapp-backend
+    networks:
+      - testapp-network
+    ports:
+      - 3000:3000
+networks:
+  testapp-network:
+    driver: bridge

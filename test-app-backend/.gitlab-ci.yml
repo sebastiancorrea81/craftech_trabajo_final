@@ -1,0 +1,58 @@
+stages:
+  - test
+  - build
+  - deploy
+
+test_app:
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  image: python:3.8-alpine
+  script:
+    - apk update 
+    - apk add postgresql-dev gcc python3-dev musl-dev zlib-dev jpeg-dev graphviz-dev libpq
+    - pip install --upgrade pip
+    - python -m pip install -r requirements.txt
+    - pytest
+  tags:
+    - k8s-runner
+
+build_push_app:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+    
+  script:
+    - |
+      if [ "$CI_COMMIT_REF_NAME" = $CI_DEFAULT_BRANCH ]; then
+        VERSION="latest"
+      else \
+        VERSION="$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+      fi
+    - echo $VERSION
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 -w 0)\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:$VERSION"
+  only:
+    - main
+    - develop
+  tags:
+    - k8s-runner
+
+deploy_app:
+  stage: deploy
+  script:
+    - echo "Deploy a review app"
+  environment:
+    name: develop
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_COMMIT_BRANCH == 'develop'
+  tags:
+    - k8s-runner
