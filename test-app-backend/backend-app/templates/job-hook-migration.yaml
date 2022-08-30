@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-hook-migration
+  annotations:
+    "helm.sh/hook": post-upgrade,post-install
+spec:
+  template:
+    spec:
+      containers:
+      - name: post-upgrade-job-migration
+        image: docker.io/sebastiancorrea/backend:latest
+        imagePullPolicy: Always
+
+        command: ['python', 'manage.py', 'migrate']
+
+        env:
+            - name: "SECRET_KEY"
+              valueFrom:
+                secretKeyRef:
+                  key:  SECRET_KEY
+                  name: env-backend
+            - name: "ALLOWED_HOSTS"
+              valueFrom:
+                secretKeyRef:
+                  key:  ALLOWED_HOSTS
+                  name: env-backend
+            - name: "SQL_ENGINE"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_ENGINE
+                  name: env-backend
+            - name: "SQL_DATABASE"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_DATABASE
+                  name: env-backend
+            - name: "SQL_USER"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_USER
+                  name: env-backend
+            - name: "SQL_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_PASSWORD
+                  name: env-backend
+            - name: "SQL_HOST"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_HOST
+                  name: env-backend
+            - name: "SQL_PORT"
+              valueFrom:
+                secretKeyRef:
+                  key:  SQL_PORT
+                  name: env-backend
+            - name: "RUNSERVER_PORT"
+              valueFrom:
+                secretKeyRef:
+                  key:  RUNSERVER_PORT
+                  name: env-backend
+
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 0
+
+  backoffLimit: 3
+  completions: 1
+  parallelism: 1

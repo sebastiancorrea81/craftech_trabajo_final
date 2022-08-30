@@ -21,7 +21,7 @@ metadata:
 type: Opaque
 
 
-
+# https://bitnami.com/stack/postgresql/helm
 #data:
 #DATABASE=postgres
 #POSTGRES_USER=admin
