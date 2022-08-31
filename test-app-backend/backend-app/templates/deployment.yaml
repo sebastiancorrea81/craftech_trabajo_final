@@ -32,6 +32,7 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ['python', 'manage.py', 'runserver',  '0.0.0.0:{{ .Values.service.port }}']
           env:
             - name: "SECRET_KEY"
               valueFrom:

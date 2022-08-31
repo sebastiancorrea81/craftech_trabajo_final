@@ -10,4 +10,4 @@ COPY . /backend
 
 RUN python -m pip install -r requirements.txt
 
-CMD ["./entrypoint.sh"]
+#CMD ["./entrypoint.sh"]
